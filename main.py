@@ -271,6 +271,56 @@ class Spyder(object):
                 'msg': error
             }
 
+    def submit(self, pid='', ans=''):
+        """Submit a problem to the OJ
+
+        This function auto submits the problem to the OJ system. You need to give
+        the problem id and answer.
+
+        Args:
+            pid (str, optional): The problem id. Defaults to ''.
+            ans (str, optional): The problem answer source code. Defaults to ''.
+
+        Returns:
+            dict: The status of submitting the problem. For example:
+                When succeeded:
+                {
+                    'status': 'success',
+                    'msg': 'success'
+                }
+                When failed:
+                {
+                    'status': 'error',
+                    'msg': '<error message>'
+                }
+        """
+        self.driver.get('http://oj.noi.cn/oj/#main/submit/%s' % pid)
+        try:
+            toggle = WebDriverWait(self.driver, 5).until(
+                EC.presence_of_element_located(
+                    (By.CLASS_NAME, 'toggle_editor'))
+            )
+            toggle.click()
+            editor = WebDriverWait(self.driver, 5).until(
+                EC.presence_of_element_located(
+                    (By.CLASS_NAME, 'submit-editor'))
+            )
+            editor.send_keys(ans)
+            submit = self.driver.find_element_by_id('submit_button')
+            dropdown = self.driver.find_element_by_xpath(
+                '//select[@name=\'language[SRC]\']/option[text()=\'c++\']')
+            dropdown.click()
+            submit.click()
+            return {
+                'status': 'success',
+                'msg': 'success'
+            }
+        except Exception as error:
+            return {
+                'status': 'error',
+                'msg': error
+            }
+
     def quit(self):
         """Quit the webdriver."""
         self.driver.quit()
@@ -284,6 +334,8 @@ if __name__ == '__main__':
     login = spyder.login()
     print('Login status:')
     pprint(login)
+    time.sleep(1)
     print('Getting problem...')
-    pprint(spyder.get_problem('1001'))
+    ans = open('./1014-test.cpp', 'r').read()
+    pprint(spyder.submit('1014', ans.replace('\t', '')))
     spyder.quit()
