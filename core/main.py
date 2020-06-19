@@ -41,8 +41,7 @@ class Spyder(object):
         self.chrome_options = Options()
         if headless:
             self.chrome_options.add_argument('--headless')
-        self.driver = webdriver.Chrome(
-            './chromedriver', options=self.chrome_options)
+        self.driver = webdriver.Chrome(options=self.chrome_options)
         self.username = username
         self.password = password
 
