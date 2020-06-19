@@ -15,6 +15,6 @@ To use it, you need to download the Chrome browser and Chrome webdriver first be
 
 - [ ] Finish documentation.
 
-- [ ] Add more features to the spyder like rank list and status.
+- [ ] Add more features to the spyder like rank list and status. (finished status)
 
 - [x] Add problem submission

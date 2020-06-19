@@ -321,21 +321,117 @@ class Spyder(object):
                 'msg': error
             }
 
+    def get_status(self, pid=''):
+        """Get problem status
+
+        This function gets the given problem's status through OJ. It returns a list
+        of all problems submitted by the current user and is the given pid.
+
+        Args:
+            pid (str, optional): The problem id. Defaults to ''.
+
+        Returns:
+            dict: The status of getting problem status. E.g:
+                When succeeded:
+                {
+                    'status': 'success',
+                    'msg': 'success',
+                    'problems': [
+                        {
+                            'index': '<problem submit index>',
+                            'pid': '<problem id>',
+                            'user': '<problem submitter username>',
+                            'status': '<problem status>',
+                            'res': <problem result, max to 100, an integer>,
+                            'time-cost': '<the time cost to run the program, in milseconds>',
+                            'space-cost': '<the space cost to run the program, in kb>',
+                            'language': '<the language of the program>',
+                            'code-length': '<the program code length>',
+                            'submit-time': '<the problem submit time>'
+                        },
+                        ...
+                    ]
+                }
+                When failed:
+                {
+                    'status': 'error',
+                    'msg': '<error message>'
+                }
+        """
+        self.driver.get(
+            'http://oj.noi.cn/oj/index.php/main/status?users%5B%5D={username}&problems%5B%5D={pid}'.format(username=self.username, pid=pid))
+        try:
+            table = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located(
+                    (By.CLASS_NAME, 'table')))
+            source = htmlmin.minify(table.get_attribute(
+                'innerHTML'), remove_empty_space=True)
+            bs = BeautifulSoup(source, 'html.parser')
+            trs = bs.find('tbody').findAll('tr')
+            results = []
+            for tr in trs:
+                result = {}
+                tds = tr.findAll('td')
+                index = tds[0].text
+                result['index'] = index
+                pid = tds[1].find('a').text
+                result['pid'] = pid
+                user = tds[2].find('span').find('a').text
+                result['user'] = user
+                status = tds[3].find('a').find('span').text
+                result['status'] = status
+                try:
+                    res = int(tds[3].find('a').findAll('span')[1].text)
+                except IndexError:
+                    res = 0
+                result['res'] = res
+                time_cost = tds[4].text
+                result['time-cost'] = time_cost
+                space_cost = tds[5].text
+                result['space-cost'] = space_cost
+                language = tds[6].find('a').text
+                result['language'] = language
+                code_length = tds[7].text
+                result['code-length'] = code_length
+                submit_time = tds[8].text
+                result['submit-time'] = submit_time
+                results.append(result)
+            if results == []:
+                return {
+                    'status': 'error',
+                    'msg': 'no results'
+                }
+            return {
+                'status': 'success',
+                'msg': 'success',
+                'problems': results
+            }
+        except Exception as error:
+            return {
+                'status': 'error',
+                'msg': error
+            }
+
     def quit(self):
         """Quit the webdriver."""
         self.driver.quit()
 
 
 if __name__ == '__main__':
-    username = input('Username: ')
-    password = input('Password: ')
+    # username = input('Username: ')
+    # password = input('Password: ')
+    username = 'samzhang0877'
+    password = 'sam951951'
     spyder = Spyder(username, password)
     print('Logging in...')
     login = spyder.login()
     print('Login status:')
     pprint(login)
     time.sleep(1)
-    print('Getting problem...')
-    ans = open('./1014-test.cpp', 'r').read()
-    pprint(spyder.submit('1014', ans.replace('\t', '')))
+    # print('Getting problem...')
+    # ans = open('./1014-test.cpp', 'r').read()
+    # pprint(spyder.submit('1014', ans.replace('\t', '')))
+    print('Getting problem status...')
+    status = spyder.get_status('1014')
+    pprint(status)
     spyder.quit()
