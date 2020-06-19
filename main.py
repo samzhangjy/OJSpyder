@@ -418,19 +418,17 @@ class Spyder(object):
 
 
 if __name__ == '__main__':
-    # username = input('Username: ')
-    # password = input('Password: ')
-    username = 'samzhang0877'
-    password = 'sam951951'
+    username = input('Username: ')
+    password = input('Password: ')
     spyder = Spyder(username, password)
     print('Logging in...')
     login = spyder.login()
     print('Login status:')
     pprint(login)
     time.sleep(1)
-    # print('Getting problem...')
-    # ans = open('./1014-test.cpp', 'r').read()
-    # pprint(spyder.submit('1014', ans.replace('\t', '')))
+    print('Getting problem...')
+    ans = open('./1014-test.cpp', 'r').read()
+    pprint(spyder.submit('1014', ans.replace('\t', '')))
     print('Getting problem status...')
     status = spyder.get_status('1014')
     pprint(status)
