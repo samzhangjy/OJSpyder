@@ -230,7 +230,10 @@ class Spyder(object):
                         'output': '<problem output>',
                         'sample_input': '<problem sample input>',
                         'sample_output': '<problem sample output>',
-                        'limits': '<problem limits>'
+                        'limits': '<problem limits>',
+                        'type': '<problem submit type>',
+                        'title': '<problem title>',
+                        'pid': '<problem id>'
                     }
                 }
                 When failed:
@@ -241,6 +244,15 @@ class Spyder(object):
         """
         self.driver.get('http://oj.noi.cn/oj/index.php/main/show/%s' % pid)
         try:
+            heading = self.driver.find_element_by_id('header')
+            source = htmlmin.minify(heading.get_attribute(
+                'innerHTML'), remove_empty_space=True)
+            bs = BeautifulSoup(source, 'html.parser')
+            header = bs.find('h2')
+            type_ = str(header.find('sub').text)
+            id = str(header.text).split('.')[0]
+            title = str(header.text).split('.')[-1].replace(type_, '').strip()
+            type_ = type_.replace('(', '').replace(')', '')
             mainbar = self.driver.find_element_by_class_name('problem')
             source = htmlmin.minify(mainbar.get_attribute(
                 'innerHTML'), remove_empty_space=True)
@@ -261,10 +273,14 @@ class Spyder(object):
                     'output': output,
                     'sample_input': sample_input,
                     'sample_output': sample_output,
-                    'limits': limits
+                    'limits': limits,
+                    'type': type_,
+                    'title': title,
+                    'pid': id
                 }
             }
         except Exception as error:
+            raise
             return {
                 'status': 'error',
                 'msg': error
@@ -426,8 +442,7 @@ if __name__ == '__main__':
     pprint(login)
     time.sleep(1)
     print('Getting problem...')
-    ans = open('./1014-test.cpp', 'r').read()
-    pprint(spyder.submit('1014', ans.replace('\t', '')))
+    pprint(spyder.get_problem('1014'))
     print('Getting problem status...')
     status = spyder.get_status('1014')
     pprint(status)

@@ -3,3 +3,4 @@
 venv/
 chromedriver
 .vscode/
+**/node_modules/

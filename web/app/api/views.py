@@ -8,6 +8,11 @@ from core.main import Spyder
 spyder = None
 
 
+def getErrName(res):
+    if isinstance(res['msg'], Exception):
+        res['msg'] = res['msg'].__class__.__name__
+    return res
+
 @api.route('/login', methods=['POST'])
 def login():
     """Login to the OJ account
@@ -23,6 +28,7 @@ def login():
     password = content['password']
     spyder = Spyder(username, password)
     status = spyder.login()
+    status = getErrName(status)
     return jsonify(status)
 
 
@@ -38,6 +44,7 @@ def get_problems():
     content = request.get_json()
     page = content['page']
     result = spyder.get_problems(page)
+    result = getErrName(result)
     return jsonify(result)
 
 
@@ -54,6 +61,7 @@ def get_problem(pid):
         flask.Response: The problem and status
     """
     result = spyder.get_problem(pid)
+    result = getErrName(result)
     return jsonify(result)
 
 
@@ -72,6 +80,7 @@ def submit_problem(pid):
     content = request.get_json()
     ans = content['ans']
     result = spyder.submit(pid, ans)
+    result = getErrName(result)
     return jsonify(result)
 
 
@@ -88,6 +97,7 @@ def get_status(pid):
         flask.Response: The status returned
     """    
     result = spyder.get_status(pid)
+    result = getErrName(result)
     return jsonify(result)
 
 
